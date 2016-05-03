@@ -152,7 +152,7 @@ class Resource(object):
         else:
             raise IOError("unsupported protocol: %s" % self.scheme)
 
-        body = urllib.urlencode(body)
+        body = urllib.urlencode(body, True)
 
         #logging.info(">>>>>>>>>>>>>>>>>>>method: %s" % method)
         #logging.info(">>>>>>>>>>>>>>>>>>>url: %s" % url)
