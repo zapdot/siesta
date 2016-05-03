@@ -115,9 +115,10 @@ class Resource(object):
 
     # PUT /resource/id
     def put(self, **kwargs):
-        if not self.id:
-            return
-        url = self.url + '/' + str(self.id)
+        # if not self.id:
+        #     return
+        # url = self.url + '/' + str(self.id)
+        url = self.url
         data = kwargs
         meta = dict([(k, data.pop(k)) for k in data.keys() if k.startswith("__")])
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
