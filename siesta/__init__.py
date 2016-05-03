@@ -100,6 +100,7 @@ class Resource(object):
             url = self.url + '/' + str(self.id)
         if len(kwargs) > 0:
             url = "%s?%s" % (url, urllib.urlencode(kwargs))
+
         self._request("GET", url)
         return self._getresponse("GET", url)
 
@@ -108,6 +109,7 @@ class Resource(object):
         data = kwargs
         meta = dict([(k, data.pop(k)) for k in data.keys() if k.startswith("__")])
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
         self._request("POST", self.url, data, headers, meta)
         return self._getresponse("POST", self.url, data, headers, meta)
 
