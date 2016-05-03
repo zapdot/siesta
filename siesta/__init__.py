@@ -161,9 +161,11 @@ class Resource(object):
     def _getresponse(self, method, url, body={}, headers={}, meta={}):
         resp = self.conn.getresponse()
         
-        #logging.info("status: %s" % resp.status)
-        #logging.info("getheader: %s" % resp.getheader('content-type'))
-        #logging.info("__read: %s" % resp.read())
+        resp_body = resp.read()
+
+        # logging.info("status: %s" % resp.status)
+        # logging.info("getheader: %s" % resp.getheader('content-type'))
+        # logging.info("__read: %s" % resp_body)
         # TODO: Lets support redirects and more advanced responses
         # see: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
@@ -194,7 +196,7 @@ class Resource(object):
         #          Client will need to read the body of the representation to find
         #          the reason for failure.
 
-        #logging.info('status type: %s' % type(resp.status))
+        # logging.info('status type: %s' % type(resp.status))
         if resp.status == 202:
             #logging.info('Starting a 202 Accept polling porcess...')
             status_url = resp.getheader('content-location')
@@ -230,24 +232,25 @@ class Resource(object):
             mime, encoding = m.groups()
         #logging.info("...")
         if mime == 'application/json':
-            #logging.info("json")
-            ret = json.loads(resp.read())
-            #logging.info("read: %s" % resp.read())
+            # logging.info("json")
+            # logging.info("read: %s" % resp_body)
+
+            ret = json.loads(resp_body)
             #logging.info("ret: %s" % ret)
         elif mime == 'application/xml':
             print 'application/xml not supported yet!'
-            ret = resp.read()
+            ret = resp_body
         else:
-            ret = resp.read()
+            ret = resp_body
         resp.close()
         #print "Siesta: response.read: %s"  % ret
         errors = True
         if str(resp.status).startswith("2") or str(resp.status).startswith("3"):
             errors = False
 
-        #print "Errors: %s" % errors
-        #print "Type ret: %s" % type(ret)
-        #print ret
+        # print "Errors: %s" % errors
+        # print "Type ret: %s" % type(ret)
+        # print ret
         
         if isinstance(ret, list):
             #print "ret is list: %s" % ret
