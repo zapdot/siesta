@@ -3,14 +3,14 @@
 
 from setuptools import setup, find_packages
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 setup(
     name='siesta',
     version=__version__,
-    description='Sit back, relax and enjoy your python REST client',
-    author='Sebastián Castillo Builes',
-    author_email='castillobuiles@gmail.com',
+    description='Zapdot fork of Siesta by Sebastián Castillo Builes',
+    author='Michael Carriere',
+    author_email='mike@zapdot.com',
     license='GPL',
     keywords='REST RESTful API HTTP web service',
     url="http://scastillo.github.com/siesta/",
