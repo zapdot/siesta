@@ -270,7 +270,7 @@ class Resource(object):
         elif isinstance(ret, dict):
             if errors:
                 #print "Updating errors"
-                self._errors.update(ret.get("error", {}))
+                self._errors.update(ret)
             else:
                 self.attrs.update(ret)
                 self._errors = {}
