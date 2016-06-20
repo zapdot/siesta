@@ -35,7 +35,7 @@ from urlparse import urlparse
 
 USER_AGENT = "Python-siesta/%s" % __version__
 
-logging.basicConfig(level=0)
+logger = logging.getLogger(__name__)
 
 
 class Resource(object):
@@ -44,7 +44,7 @@ class Resource(object):
     # so Resource can have a minimalist namespace  population
     # and minimize collitions with resource attributes
     def __init__(self, uri, api):
-        #logging.info("init.uri: %s" % uri)
+        #logger.info("init.uri: %s" % uri)
         self.api = api
         self.uri = uri
         self.scheme, self.host, self.url, z1, z2 = httplib.urlsplit(self.api.base_url + self.uri)
@@ -59,11 +59,11 @@ class Resource(object):
         Resource attributes (eg: user.name) have priority
         over inner rerouces (eg: users(id=123).applications)
         """
-        #logging.info("getattr.name: %s" % name)
+        #logger.info("getattr.name: %s" % name)
         # Reource attrs like: user.name
         if name in self.attrs:
             return self.attrs.get(name)
-        #logging.info("self.url: %s" % self.url)
+        #logger.info("self.url: %s" % self.url)
         # Inner resoruces for stuff like: GET /users/{id}/applications
         key = self.uri + '/' + name
         self.api.resources[key] = Resource(uri=key,
@@ -71,8 +71,8 @@ class Resource(object):
         return self.api.resources[key]
 
     def __call__(self, id=None):
-        #logging.info("call.id: %s" % id)
-        #logging.info("call.self.url: %s" % self.url)
+        #logger.info("call.id: %s" % id)
+        #logger.info("call.self.url: %s" % self.url)
         if id == None:
             return self
         self.id = str(id)
@@ -155,10 +155,10 @@ class Resource(object):
 
         body = urllib.urlencode(body, True)
 
-        #logging.info(">>>>>>>>>>>>>>>>>>>method: %s" % method)
-        #logging.info(">>>>>>>>>>>>>>>>>>>url: %s" % url)
-        #logging.info(">>>>>>>>>>>>>>>>>>>headers: %s" % headers)
-        #logging.info(">>>>>>>>>>>>>>>>>>>body: %s" % body)
+        #logger.info(">>>>>>>>>>>>>>>>>>>method: %s" % method)
+        #logger.info(">>>>>>>>>>>>>>>>>>>url: %s" % url)
+        #logger.info(">>>>>>>>>>>>>>>>>>>headers: %s" % headers)
+        #logger.info(">>>>>>>>>>>>>>>>>>>body: %s" % body)
         self.conn.request(method, url, body, headers)
 
     def _getresponse(self, method, url, body={}, headers={}, meta={}):
@@ -166,9 +166,9 @@ class Resource(object):
         
         resp_body = resp.read()
 
-        # logging.info("status: %s" % resp.status)
-        # logging.info("getheader: %s" % resp.getheader('content-type'))
-        # logging.info("__read: %s" % resp_body)
+        # logger.info("status: %s" % resp.status)
+        # logger.info("getheader: %s" % resp.getheader('content-type'))
+        # logger.info("__read: %s" % resp_body)
         # TODO: Lets support redirects and more advanced responses
         # see: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
@@ -199,9 +199,9 @@ class Resource(object):
         #          Client will need to read the body of the representation to find
         #          the reason for failure.
 
-        # logging.info('status type: %s' % type(resp.status))
+        # logger.info('status type: %s' % type(resp.status))
         if resp.status == 202:
-            #logging.info('Starting a 202 Accept polling porcess...')
+            #logger.info('Starting a 202 Accept polling porcess...')
             status_url = resp.getheader('content-location')
             if not status_url:
                 raise Exception('Empty content-location from server')
@@ -211,9 +211,9 @@ class Resource(object):
             retries = 0
             MAX_RETRIES = 3
             resp_status = st_resp.status
-            #logging.info("##########33>>>>>>>> status: %s" % resp_status)
+            #logger.info("##########33>>>>>>>> status: %s" % resp_status)
             while resp_status != 303 and retries < MAX_RETRIES:
-                #logging.info('retry #%s' % retries)
+                #logger.info('retry #%s' % retries)
                 retries += 1
                 status.get()
                 time.sleep(5)
@@ -224,22 +224,22 @@ class Resource(object):
             location = status.conn.getresponse().getheader('location')
             resource = Resource(uri=urlparse(location).path, api=self.api).get()
             return resource
-        #logging.info("resp.getheader(): %s" % resp.getheader('content-type'))
+        #logger.info("resp.getheader(): %s" % resp.getheader('content-type'))
         m = re.match('^([^;]*)(?:;\s*charset=(.*))?$',
                      resp.getheader('content-type'))
-        #logging.info("response: %s" % resp)
+        #logger.info("response: %s" % resp)
         
         if m == None:
             mime, encoding = ('', '')
         else:
             mime, encoding = m.groups()
-        #logging.info("...")
+        #logger.info("...")
         if mime == 'application/json':
-            # logging.info("json")
-            # logging.info("read: %s" % resp_body)
+            # logger.info("json")
+            # logger.info("read: %s" % resp_body)
 
             ret = json.loads(resp_body)
-            #logging.info("ret: %s" % ret)
+            #logger.info("ret: %s" % ret)
         elif mime == 'application/xml':
             print 'application/xml not supported yet!'
             ret = resp_body
@@ -293,11 +293,11 @@ class API(object):
             self.resources[resource].set_request_type(mime)
 
     def __getattr__(self, name):
-        #logging.info("API.getattr.name: %s" % name)
+        #logger.info("API.getattr.name: %s" % name)
         
         key = name
         if not key in self.resources:
-            #logging.info("Creating resource with uri: %s" % key)
+            #logger.info("Creating resource with uri: %s" % key)
             self.resources[key] = Resource(uri=key,
                                            api=self)
         return self.resources[key]
