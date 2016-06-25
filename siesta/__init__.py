@@ -122,25 +122,21 @@ class Resource(object):
         self._request("POST", self.url, json.dumps(data), headers, meta)
         return self._getresponse("POST", self.url, data, headers, meta)
 
+    # PUT /resource
     def put(self, **kwargs):
-        # if not self.id:
-        #     return
-        # url = self.url + '/' + str(self.id)
-        url = self.url
         data = kwargs
         meta = dict([(k, data.pop(k)) for k in data.keys() if k.startswith("__")])
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        self._request("PUT", url, data, headers, meta)
-        return self._getresponse("PUT", url, data, headers, meta)
+        self._request("PUT", self.url, data, headers, meta)
+        return self._getresponse("PUT", self.url, data, headers, meta)
 
-    # DELETE /resource/id
-    def delete(self, id, **kwargs):
-        url = self.url + '/' + str(id)
+    # DELETE /resource
+    def delete(self, **kwargs):
         data = kwargs
         meta = dict([(k, data.pop(k)) for k in data.keys() if k.startswith("__")])
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        self._request("DELETE", url, data, headers, meta)
-        return self._getresponse("DELETE", url, data, headers, meta)
+        self._request("DELETE", self.url, data, headers, meta)
+        return self._getresponse("DELETE", self.url, data, headers, meta)
 
     def _request(self, method, url, body=None, headers={}, meta={}):
         if self.api.auth:
