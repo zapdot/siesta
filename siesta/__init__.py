@@ -157,7 +157,7 @@ class Resource(object):
         else:
             raise IOError("unsupported protocol: %s" % self.scheme)
 
-        if not isinstance(body, basestring):
+        if body and not isinstance(body, basestring):
             body = urllib.urlencode(body, True)
 
         #logger.info(">>>>>>>>>>>>>>>>>>>method: %s" % method)
