@@ -208,27 +208,25 @@ class Resource(object):
         if resp.status == 202:
             #logger.info('Starting a 202 Accept polling porcess...')
             status_url = resp.getheader('content-location')
-            if not status_url:
-                raise Exception('Empty content-location from server')
-
-            status_uri = urlparse(status_url).path
-            status, st_resp  = Resource(uri=status_uri, api=self.api).get()
-            retries = 0
-            MAX_RETRIES = 3
-            resp_status = st_resp.status
-            #logger.info("##########33>>>>>>>> status: %s" % resp_status)
-            while resp_status != 303 and retries < MAX_RETRIES:
-                #logger.info('retry #%s' % retries)
-                retries += 1
-                status.get()
-                time.sleep(5)
+            if status_url:
+                status_uri = urlparse(status_url).path
+                status, st_resp  = Resource(uri=status_uri, api=self.api).get()
+                retries = 0
+                MAX_RETRIES = 3
+                resp_status = st_resp.status
+                #logger.info("##########33>>>>>>>> status: %s" % resp_status)
+                while resp_status != 303 and retries < MAX_RETRIES:
+                    #logger.info('retry #%s' % retries)
+                    retries += 1
+                    status.get()
+                    time.sleep(5)
+                    
+                if retries == MAX_RETRIES:
+                    raise Exception('Max retries limit reached without success')
                 
-            if retries == MAX_RETRIES:
-                raise Exception('Max retries limit reached without success')
-            
-            location = status.conn.getresponse().getheader('location')
-            resource = Resource(uri=urlparse(location).path, api=self.api).get()
-            return resource
+                location = status.conn.getresponse().getheader('location')
+                resource = Resource(uri=urlparse(location).path, api=self.api).get()
+                return resource
         #logger.info("resp.getheader(): %s" % resp.getheader('content-type'))
         m = re.match('^([^;]*)(?:;\s*charset=(.*))?$',
                      resp.getheader('content-type'))
