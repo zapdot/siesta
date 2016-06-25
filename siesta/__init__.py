@@ -113,7 +113,15 @@ class Resource(object):
         self._request("POST", self.url, data, headers, meta)
         return self._getresponse("POST", self.url, data, headers, meta)
 
-    # PUT /resource/id
+    # POST /resource (json-encoded data)
+    def post_json(self, **kwargs):
+        data = kwargs
+        meta = dict([(k, data.pop(k)) for k in data.keys() if k.startswith("__")])
+        headers = {"Content-Type": "application/json"}
+
+        self._request("POST", self.url, json.dumps(data), headers, meta)
+        return self._getresponse("POST", self.url, data, headers, meta)
+
     def put(self, **kwargs):
         # if not self.id:
         #     return
@@ -134,7 +142,7 @@ class Resource(object):
         self._request("DELETE", url, data, headers, meta)
         return self._getresponse("DELETE", url, data, headers, meta)
 
-    def _request(self, method, url, body={}, headers={}, meta={}):
+    def _request(self, method, url, body=None, headers={}, meta={}):
         if self.api.auth:
             headers.update(self.api.auth.make_headers())
         
@@ -153,7 +161,8 @@ class Resource(object):
         else:
             raise IOError("unsupported protocol: %s" % self.scheme)
 
-        body = urllib.urlencode(body, True)
+        if not isinstance(body, basestring):
+            body = urllib.urlencode(body, True)
 
         #logger.info(">>>>>>>>>>>>>>>>>>>method: %s" % method)
         #logger.info(">>>>>>>>>>>>>>>>>>>url: %s" % url)
@@ -161,7 +170,7 @@ class Resource(object):
         #logger.info(">>>>>>>>>>>>>>>>>>>body: %s" % body)
         self.conn.request(method, url, body, headers)
 
-    def _getresponse(self, method, url, body={}, headers={}, meta={}):
+    def _getresponse(self, method, url, body=None, headers={}, meta={}):
         resp = self.conn.getresponse()
         
         resp_body = resp.read()
